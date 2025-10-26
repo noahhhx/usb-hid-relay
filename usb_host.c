@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <linux/input.h>
+#include <getopt.h>
+
+void print_usage(const char *program_name) {
+  printf("Usage: %s [OPTIONS]\n", program_name);
+  printf("Options:\n");
+  printf("  -d, --device <path>     HID device path (default: /dev/input/event16)\n");
+  printf("  -p, --port <port>       UDP port (default: 5555)\n");
+  printf("  -i, --ip <address>      Pi Zero IP address (default: 192.168.1.100)\n");
+  printf("  -h, --help              Show this help message\n");
+}
+
+int main(int argc, char *argv[]) {
+
+  char *device = "/dev/input/event16";
+  int UDP_PORT = 5555;
+  char *PI_ZERO_IP = "192.168.1.100";
+
+  static struct option long_options[] = {
+    {"device", required_argument, 0, 'd'},
+    {"port",   required_argument, 0, 'p'},
+    {"ip",     required_argument, 0, 'i'},
+    {"help",   no_argument,       0, 'h'},
+    {0, 0, 0, 0}
+  };
+
+  int opt;
+  int option_index = 0;
+
+  while ((opt = getopt_long(argc, argv, "d:p:i:h", long_options, &option_index)) != -1) {
+    switch (opt) {
+      case 'd':
+        device = optarg;
+        break;
+      case 'p':
+        UDP_PORT = atoi(optarg);
+        break;
+      case 'i':
+        PI_ZERO_IP = optarg;
+        break;
+      case 'h':
+        print_usage(argv[0]);
+        return 0;
+      default:
+        print_usage(argv[0]);
+        return 1;
+    }
+  }
+
+  struct sockaddr_in pi_addr;
+  struct input_event ev;
+  char report[3] = {0, 0, 0};
+
+  // Open HID device (mouse)
+  int mouse_fd = open(device, O_RDONLY);
+  if (mouse_fd < 0) {
+    perror("Failed to get mouse");
+    return 1;
+  }
+  printf("Opened mouse: %d\n", mouse_fd);
+
+  // Create UDP socket
+  int sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
+  if (sock_fd < 0) {
+    perror("Failed to get socket");
+    close(mouse_fd);
+    return 1;
+  }
+  printf("Opened socket: %d\n", sock_fd);
+
+  // Setup Pi Zero address
+  memset(&pi_addr, 0, sizeof(pi_addr));
+  pi_addr.sin_family = AF_INET;
+  pi_addr.sin_port = htons(UDP_PORT);
+  if (inet_pton(AF_INET, PI_ZERO_IP, &pi_addr.sin_addr) <= 0) {
+    perror("Invalid IP address");
+    close(sock_fd);
+    close(mouse_fd);
+    return 1;
+  }
+
+  printf("Forwarding to %s:%d\n", PI_ZERO_IP, UDP_PORT);
+
+
+
+  printf("Hello, World!\n");
+  return 0;
+}
