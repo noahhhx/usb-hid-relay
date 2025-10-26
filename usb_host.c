@@ -21,7 +21,7 @@ void print_usage(const char *program_name) {
 
 int main(int argc, char *argv[]) {
 
-  char *device = "/dev/input/event16";
+  char *device = "/dev/input/event15";
   int UDP_PORT = 5555;
   char *PI_ZERO_IP = "192.168.1.100";
 
@@ -89,6 +89,38 @@ int main(int argc, char *argv[]) {
   }
 
   printf("Forwarding to %s:%d\n", PI_ZERO_IP, UDP_PORT);
+
+  while (read(mouse_fd, &ev, sizeof(ev)) == sizeof(ev)) {
+    if (ev.type == EV_KEY) {
+      if (ev.code == BTN_LEFT) {
+        report[0] = ev.value ? (report[0] | 1) : (report[0] & ~1);
+      } else if (ev.code == BTN_RIGHT) {
+        report[0] = ev.value ? (report[0] | 2) : (report[0] & ~2);
+      } else if (ev.code == BTN_MIDDLE) {
+        report[0] = ev.value ? (report[0] | 4) : (report[0] & ~4);
+      }
+
+      sendto(sock_fd, report, 3, 0,
+             (struct sockaddr*)&pi_addr, sizeof(pi_addr));
+    }
+    else if (ev.type == EV_REL) {
+      if (ev.code == REL_X) {
+        report[1] = (ev.value > 127) ? 127 :
+                   (ev.value < -127) ? -127 : ev.value;
+        report[2] = 0;
+      } else if (ev.code == REL_Y) {
+        report[1] = 0;
+        report[2] = (ev.value > 127) ? 127 :
+                   (ev.value < -127) ? -127 : ev.value;
+      }
+
+      sendto(sock_fd, report, 3, 0,
+             (struct sockaddr*)&pi_addr, sizeof(pi_addr));
+
+      report[1] = 0;
+      report[2] = 0;
+    }
+  }
 
 
 
