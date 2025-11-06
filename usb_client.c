@@ -3,10 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 
 #define UDP_PORT 5555
 #define HID_DEVICE "/dev/hidg0"
@@ -18,13 +16,12 @@ int main() {
   char report[3];
 
   // Open HID device
-  // TODO - uncomment
-  // hid_fd = open(HID_DEVICE, O_WRONLY | O_NONBLOCK);
-  // if (hid_fd < 0) {
-  //   perror("Failed to open HID device");
-  //   return 1;
-  // }
-  // printf("Opened HID device: %s\n", HID_DEVICE);
+  hid_fd = open(HID_DEVICE, O_WRONLY | O_NONBLOCK);
+  if (hid_fd < 0) {
+    perror("Failed to open HID device");
+    return 1;
+  }
+  printf("Opened HID device: %s\n", HID_DEVICE);
 
   // Create UDP socket
   sock_fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -55,12 +52,19 @@ int main() {
                         (struct sockaddr*)&client_addr, &addr_len);
 
     if (n == 3) {
-      printf("Received from UDP");
+      printf("Received from UDP: [%02X %02X %02X]\n",
+             (unsigned char)report[0],
+             (unsigned char)report[1],
+             (unsigned char)report[2]);
       // Write to HID device immediately
       // TODO - uncomment
-      // if (write(hid_fd, report, 3) != 3) {
-      //   perror("Failed to write to HID");
-      // }
+      ssize_t written = write(hid_fd, report, 3);
+      if (written != 3) {
+        perror("Failed to write to HID");
+        printf("Only wrote %zd bytes\n", written);
+      } else {
+        printf("Successfully wrote to HID\n");
+      }
     }
   }
 
