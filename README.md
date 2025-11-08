@@ -3,6 +3,8 @@
 ## tldr;
 Fuck League of Legends, fuck Riot and fuck Vanguard.
 
+Relay mouse events from Linux to Windows, over UDP via Pi acting as a HID device.
+
 ## Motivations
 I use Linux for everything in my life other than League of Legends, so I have an old PC setup as a 
 server for League of Legends. For this I use [Sunshine](link here) on the Windows PC to host and 
