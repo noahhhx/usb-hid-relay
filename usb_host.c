@@ -15,9 +15,9 @@
 void print_usage(const char *program_name) {
   printf("Usage: %s [OPTIONS]\n", program_name);
   printf("Options:\n");
-  printf("  -d, --device <path>     HID device path (default: /dev/input/event16)\n");
+  printf("  -d, --device <path>     HID device path (default: /dev/input/event4)\n");
   printf("  -p, --port <port>       UDP port (default: 5555)\n");
-  printf("  -i, --ip <address>      Pi Zero IP address (default: 192.168.1.100)\n");
+  printf("  -i, --ip <address>      Pi Zero IP address (default: 192.168.1.102)\n");
   printf("  -w, --window <name>     Target window name (optional)\n");
   printf("  -h, --help              Show this help message\n");
 }
