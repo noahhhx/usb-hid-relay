@@ -14,6 +14,9 @@ blocks the virtual mouse that Sunshine + Moonlight uses.
 
 This project is an attempt to fix this.
 
+## Demo
+![Demo](./demo.gif)
+
 ## Setup/Environment
 - Windows 11 PC
   - [Sunshine](https://github.com/LizardByte/Sunshine)
