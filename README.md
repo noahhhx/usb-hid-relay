@@ -6,10 +6,10 @@ Fuck League of Legends, fuck Riot and fuck Vanguard.
 Relay mouse events from Linux to Windows, over UDP via Pi acting as a HID device.
 
 ## Motivations
-I use Linux for everything in my life other than League of Legends, so I have an old PC setup as a 
-server for League of Legends. For this I use [Sunshine](link here) on the Windows PC to host and 
-[Moonlight](link here) on the Linux machine to remote in. Since everything is wired locally, this 
-works with virtually 0 noticeable latency. The problem is the shitty abomination that Vanguard is 
+I use Linux for everything in my life other than League of Legends, so I have an old PC setup as a
+server for League of Legends. For this I use [Sunshine](link here) on the Windows PC to host and
+[Moonlight](link here) on the Linux machine to remote in. Since everything is wired locally, this
+works with virtually 0 noticeable latency. The problem is the shitty abomination that Vanguard is
 blocks the virtual mouse that Sunshine + Moonlight uses.
 
 This project is an attempt to fix this.
@@ -67,7 +67,7 @@ and add dtoverlay if it's not under [all]
 dtoverlay=dwc2
 ```
 
-Reboot 
+Reboot
 ```shell
 sudo reboot
 lsmod | grep dwc2 # Should now show dwc2
@@ -156,7 +156,7 @@ mkdir -p functions/hid.usb0
 echo 2 > functions/hid.usb0/protocol
 echo 1 > functions/hid.usb0/subclass
 echo 4 > functions/hid.usb0/report_length
-echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x03\\x15\\x00\\x25\\x01\\x95\\x03\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x05\\x81\\x03\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x02\\x81\\x06\\x09\\x38\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x01\\x81\\x06\\xc0\\xc0 > functions/hid.usb0/report_desc
+echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x05\\x15\\x00\\x25\\x01\\x95\\x05\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x03\\x81\\x03\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x02\\x81\\x06\\x09\\x38\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x01\\x81\\x06\\xc0\\xc0 > functions/hid.usb0/report_desc
 
 ln -s functions/hid.usb0 configs/c.1/
 

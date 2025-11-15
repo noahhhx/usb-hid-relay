@@ -136,6 +136,12 @@ int main(int argc, char *argv[]) {
         buttons = ev.value ? (buttons | 2) : (buttons & ~2);
       } else if (ev.code == BTN_MIDDLE) {
         buttons = ev.value ? (buttons | 4) : (buttons & ~4);
+      } else if (ev.code == BTN_SIDE || ev.code == BTN_BACK) {
+        // Map side/back to HID Button 4 (bit 3)
+        buttons = ev.value ? (buttons | 8) : (buttons & ~8);
+      } else if (ev.code == BTN_EXTRA || ev.code == BTN_FORWARD) {
+        // Map extra/forward to HID Button 5 (bit 4)
+        buttons = ev.value ? (buttons | 16) : (buttons & ~16);
       }
       // Send immediate button state change with zero movement for click responsiveness
       report[0] = (char)buttons;

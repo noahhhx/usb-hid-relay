@@ -75,7 +75,7 @@ main() {
   echo 2 > functions/hid.usb0/protocol   # Mouse
   echo 1 > functions/hid.usb0/subclass   # Boot
   echo 4 > functions/hid.usb0/report_length
-  # Report descriptor: Buttons (3), Padding (5), X, Y (rel), Wheel (rel)
+  # Report descriptor: Buttons (5), Padding (3), X, Y (rel), Wheel (rel)
   echo -ne \
 "\x05\x01"      # Usage Page (Generic Desktop)\
 "\x09\x02"      # Usage (Mouse)\
@@ -84,14 +84,14 @@ main() {
 "\xA1\x00"      #   Collection (Physical)\
 "\x05\x09"      #     Usage Page (Button)\
 "\x19\x01"      #     Usage Minimum (Button 1)\
-"\x29\x03"      #     Usage Maximum (Button 3)\
+"\x29\x05"      #     Usage Maximum (Button 5)\
 "\x15\x00"      #     Logical Minimum (0)\
 "\x25\x01"      #     Logical Maximum (1)\
-"\x95\x03"      #     Report Count (3)\
+"\x95\x05"      #     Report Count (5)\
 "\x75\x01"      #     Report Size (1)\
 "\x81\x02"      #     Input (Data,Var,Abs) - buttons\
 "\x95\x01"      #     Report Count (1)\
-"\x75\x05"      #     Report Size (5)\
+"\x75\x03"      #     Report Size (3)\
 "\x81\x03"      #     Input (Const,Var,Abs) - padding\
 "\x05\x01"      #     Usage Page (Generic Desktop)\
 "\x09\x30"      #     Usage (X)\
