@@ -15,11 +15,18 @@
 void print_usage(const char *program_name) {
   printf("Usage: %s [OPTIONS]\n", program_name);
   printf("Options:\n");
-  printf("  -d, --device <path>     HID device path (default: /dev/input/event4)\n");
+  printf("  -d, --device <path>     HID device path (default: /dev/input/event15)\n");
   printf("  -p, --port <port>       UDP port (default: 5555)\n");
   printf("  -i, --ip <address>      Pi Zero IP address (default: 192.168.1.102)\n");
   printf("  -w, --window <name>     Target window name (optional)\n");
+  printf("  -s, --scale <float>     Sensitivity scale (default: 1.0)\n");
   printf("  -h, --help              Show this help message\n");
+}
+
+static inline int clamp_int(int v, int lo, int hi) {
+  if (v < lo) return lo;
+  if (v > hi) return hi;
+  return v;
 }
 
 int main(int argc, char *argv[]) {
@@ -28,12 +35,14 @@ int main(int argc, char *argv[]) {
   int UDP_PORT = 5555;
   char *PI_ZERO_IP = "192.168.1.102";
   char *target_window = NULL;
+  double scale = 1.0;
 
   static struct option long_options[] = {
     {"device", required_argument, 0, 'd'},
     {"port",   required_argument, 0, 'p'},
     {"ip",     required_argument, 0, 'i'},
     {"window", required_argument, 0, 'w'},
+    {"scale",  required_argument, 0, 's'},
     {"help",   no_argument,       0, 'h'},
     {0, 0, 0, 0}
   };
@@ -41,7 +50,7 @@ int main(int argc, char *argv[]) {
   int opt;
   int option_index = 0;
 
-  while ((opt = getopt_long(argc, argv, "d:p:i:w:h", long_options, &option_index)) != -1) {
+  while ((opt = getopt_long(argc, argv, "d:p:i:w:s:h", long_options, &option_index)) != -1) {
     switch (opt) {
       case 'd':
         device = optarg;
@@ -55,6 +64,11 @@ int main(int argc, char *argv[]) {
       case 'w':
         target_window = optarg;
         break;
+      case 's':
+        scale = atof(optarg);
+        if (scale <= 0.01) scale = 0.01;
+        if (scale > 32.0) scale = 32.0;
+        break;
       case 'h':
         print_usage(argv[0]);
         return 0;
@@ -66,6 +80,9 @@ int main(int argc, char *argv[]) {
 
   struct sockaddr_in pi_addr;
   struct input_event ev;
+  unsigned char buttons = 0;
+  int accum_dx = 0;
+  int accum_dy = 0;
   char report[3] = {0, 0, 0};
 
   // Open HID device (mouse)
@@ -114,32 +131,43 @@ int main(int argc, char *argv[]) {
 
     if (ev.type == EV_KEY) {
       if (ev.code == BTN_LEFT) {
-        report[0] = ev.value ? (report[0] | 1) : (report[0] & ~1);
+        buttons = ev.value ? (buttons | 1) : (buttons & ~1);
       } else if (ev.code == BTN_RIGHT) {
-        report[0] = ev.value ? (report[0] | 2) : (report[0] & ~2);
+        buttons = ev.value ? (buttons | 2) : (buttons & ~2);
       } else if (ev.code == BTN_MIDDLE) {
-        report[0] = ev.value ? (report[0] | 4) : (report[0] & ~4);
+        buttons = ev.value ? (buttons | 4) : (buttons & ~4);
       }
-
-      sendto(sock_fd, report, 3, 0,
-             (struct sockaddr*)&pi_addr, sizeof(pi_addr));
+      // Send immediate button state change with zero movement for click responsiveness
+      report[0] = (char)buttons;
+      report[1] = 0;
+      report[2] = 0;
+      sendto(sock_fd, report, 3, 0, (struct sockaddr*)&pi_addr, sizeof(pi_addr));
     }
     else if (ev.type == EV_REL) {
       if (ev.code == REL_X) {
-        report[1] = (ev.value > 127) ? 127 :
-                   (ev.value < -127) ? -127 : ev.value;
-        report[2] = 0;
+        accum_dx += ev.value;
       } else if (ev.code == REL_Y) {
-        report[1] = 0;
-        report[2] = (ev.value > 127) ? 127 :
-                   (ev.value < -127) ? -127 : ev.value;
+        accum_dy += ev.value;
       }
-
-      sendto(sock_fd, report, 3, 0,
-             (struct sockaddr*)&pi_addr, sizeof(pi_addr));
-
-      report[1] = 0;
-      report[2] = 0;
+    }
+    else if (ev.type == EV_SYN && ev.code == SYN_REPORT) {
+      // Scale, round and chunk accumulated movement; send combined X+Y per report
+      double vx = accum_dx * scale;
+      double vy = accum_dy * scale;
+      int total_x = (int)(vx >= 0 ? vx + 0.5 : vx - 0.5);
+      int total_y = (int)(vy >= 0 ? vy + 0.5 : vy - 0.5);
+      while (total_x != 0 || total_y != 0) {
+        int chunk_x = clamp_int(total_x, -127, 127);
+        int chunk_y = clamp_int(total_y, -127, 127);
+        report[0] = (char)buttons;
+        report[1] = (char)chunk_x;
+        report[2] = (char)chunk_y;
+        sendto(sock_fd, report, 3, 0, (struct sockaddr*)&pi_addr, sizeof(pi_addr));
+        total_x -= chunk_x;
+        total_y -= chunk_y;
+      }
+      accum_dx = 0;
+      accum_dy = 0;
     }
   }
 

@@ -13,7 +13,7 @@ int main() {
   int sock_fd, hid_fd;
   struct sockaddr_in server_addr, client_addr;
   socklen_t addr_len = sizeof(client_addr);
-  char report[3];
+  unsigned char report[4];
 
   // Open HID device
   hid_fd = open(HID_DEVICE, O_WRONLY | O_NONBLOCK);
@@ -48,23 +48,19 @@ int main() {
 
   // Main loop
   while (1) {
-    ssize_t n = recvfrom(sock_fd, report, 3, 0,
+    ssize_t n = recvfrom(sock_fd, report, sizeof(report), 0,
                         (struct sockaddr*)&client_addr, &addr_len);
 
+
     if (n == 3) {
-      printf("Received from UDP: [%02X %02X %02X]\n",
-             (unsigned char)report[0],
-             (unsigned char)report[1],
-             (unsigned char)report[2]);
-      // Write to HID device immediately
-      // TODO - uncomment
-      ssize_t written = write(hid_fd, report, 3);
-      if (written != 3) {
-        perror("Failed to write to HID");
-        printf("Only wrote %zd bytes\n", written);
-      } else {
-        printf("Successfully wrote to HID\n");
-      }
+      // Pad to 4-byte HID report: [buttons, dx, dy, wheel=0]
+      report[3] = 0;
+      write(hid_fd, report, 4);
+    } else if (n == 4) {
+      write(hid_fd, report, 4);
+    } else {
+      // Ignore malformed packets
+      continue;
     }
   }
 

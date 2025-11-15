@@ -153,7 +153,7 @@ mkdir -p functions/hid.usb0
 echo 2 > functions/hid.usb0/protocol
 echo 1 > functions/hid.usb0/subclass
 echo 4 > functions/hid.usb0/report_length
-echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x03\\x15\\x00\\x25\\x01\\x95\\x03\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x05\\x81\\x03\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x02\\x81\\x06\\xc0\\xc0 > functions/hid.usb0/report_desc
+echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x03\\x15\\x00\\x25\\x01\\x95\\x03\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x05\\x81\\x03\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x02\\x81\\x06\\x09\\x38\\x15\\x81\\x25\\x7f\\x75\\x08\\x95\\x01\\x81\\x06\\xc0\\xc0 > functions/hid.usb0/report_desc
 
 ln -s functions/hid.usb0 configs/c.1/
 
@@ -236,9 +236,10 @@ You are looking for the event number of your mouse.
 
 Then run:
 ```shell
-sudo -E ./usb_host -d /dev/input/event5 -i 192.168.0.102 -w stream.Moonlight
+sudo -E ./usb_host -d /dev/input/event5 -i 192.168.0.102 -w stream.Moonlight -s 1.677
 ```
 `sudo -E` or `sudo HYPRLAND_INSTANCE_SIGNATURE=$HYPRLAND_INSTANCE_SIGNATURE` so we can use hyprctl. \
 `event5` = mouse event number \
 `192.168.0.102` = IP of Pi \
-`stream.Moonlight` = Class of window (I only want to send mouse events when Moonlight is active)
+`stream.Moonlight` = Class of window (I only want to send mouse events when Moonlight is active) \
+`1.677` = Sensitivity scaling`
