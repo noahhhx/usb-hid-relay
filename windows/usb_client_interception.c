@@ -2,11 +2,43 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "interception.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
 #define UDP_PORT 5555
+
+int is_league_active() {
+    static DWORD last_check = 0;
+    static int cached_result = 0;
+    DWORD now = GetTickCount();
+
+    // Check every 500ms to avoid calling Windows API too frequently
+    if (now - last_check < 500 && last_check != 0) {
+        return cached_result;
+    }
+    last_check = now;
+
+    HWND hwnd = GetForegroundWindow();
+    if (hwnd == NULL) {
+        cached_result = 0;
+        return 0;
+    }
+
+    char title[256];
+    // GetWindowTextA is the ANSI version, compatible with char buffers
+    if (GetWindowTextA(hwnd, title, sizeof(title)) > 0) {
+        // Check if title contains "League of Legends"
+        if (strstr(title, "League of Legends") != NULL) {
+            cached_result = 1;
+            return 1;
+        }
+    }
+
+    cached_result = 0;
+    return 0;
+}
 
 int main() {
     WSADATA wsaData;
@@ -40,11 +72,16 @@ int main() {
     while (1) {
         int n = recvfrom(sock_fd, recv_buf, sizeof(recv_buf), 0, (struct sockaddr*)&client_addr, &addr_len);
 
-        printf("Received %d bytes: Buttons=%02x, X=%d, Y=%d\n",
-               n,
-               recv_buf[0],
-               (signed char) recv_buf[1],
-               (signed char) recv_buf[2]);
+        if (!is_league_active()) {
+            continue;
+        }
+
+        // Uncomment for debug
+        // printf("Received %d bytes: Buttons=%02x, X=%d, Y=%d\n",
+        //        n,
+        //        recv_buf[0],
+        //        (signed char) recv_buf[1],
+        //        (signed char) recv_buf[2]);
 
         if (n > 0) {
             int dx = 0, dy = 0, buttons = 0;
