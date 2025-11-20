@@ -7,10 +7,11 @@ Relay mouse events from Linux to Windows, over UDP via Pi acting as a HID device
 
 ## Motivations
 I use Linux for everything in my life other than League of Legends, so I have an old PC setup as a
-server for League of Legends. For this I use [Sunshine](link here) on the Windows PC to host and
-[Moonlight](link here) on the Linux machine to remote in. Since everything is wired locally, this
-works with virtually 0 noticeable latency. The problem is the shitty abomination that Vanguard is
-blocks the virtual mouse that Sunshine + Moonlight uses.
+server for League of Legends. For this I use [Sunshine](https://github.com/LizardByte/Sunshine) on 
+the Windows PC to host and [Moonlight](https://github.com/moonlight-stream) on the Linux machine to 
+remote in. Since everything is wired locally, this works with virtually 0 noticeable latency. The 
+problem is the shitty abomination that Vanguard is blocks the virtual mouse that Sunshine + 
+Moonlight uses.
 
 This project is an attempt to fix this.
 
