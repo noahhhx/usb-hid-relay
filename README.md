@@ -7,10 +7,11 @@ Relay mouse events from Linux to Windows, over UDP via Pi acting as a HID device
 
 ## Motivations
 I use Linux for everything in my life other than League of Legends, so I have an old PC setup as a
-server for League of Legends. For this I use [Sunshine](link here) on the Windows PC to host and
-[Moonlight](link here) on the Linux machine to remote in. Since everything is wired locally, this
-works with virtually 0 noticeable latency. The problem is the shitty abomination that Vanguard is
-blocks the virtual mouse that Sunshine + Moonlight uses.
+server for League of Legends. For this I use [Sunshine](https://github.com/LizardByte/Sunshine) on 
+the Windows PC to host and [Moonlight](https://github.com/moonlight-stream) on the Linux machine to 
+remote in. Since everything is wired locally, this works with virtually 0 noticeable latency. The 
+problem is the shitty abomination that Vanguard is blocks the virtual mouse that Sunshine + 
+Moonlight uses.
 
 This project is an attempt to fix this.
 
@@ -246,3 +247,28 @@ sudo -E ./usb_host -d /dev/input/event5 -i 192.168.0.102 -w stream.Moonlight -s 
 `192.168.0.102` = IP of Pi \
 `stream.Moonlight` = Class of window (I only want to send mouse events when Moonlight is active) \
 `1.677` = Sensitivity scaling`
+
+## Windows Alternative
+
+Few notes \
+This requires a mouse plugged into the Windows host, a dummy plug works and is probably desirable. \
+This will flag malware warnings etc on Windows, C'est la Vie.
+
+### Build Windows User Client
+```shell
+sudo pacman -S mingw-w64-gcc
+```
+```shell
+x86_64-w64-mingw32-gcc -o usb_client_win.exe windows/usb_client_interception.c windows/interception.dll -lws2_32
+```
+
+### Windows Setup
+- Download [oblitum's interception](https://github.com/oblitum/Interception/)
+- Open command prompt in the `command line installer` directory
+- Run `install-interception.exe /install`
+- Reboot
+
+### Running
+- Copy the usb_client_win.exe & [interception.dll](./windows/interception.dll) to the Windows machine.
+- Run usb_client_win.exe (must be in same location as the dll)
+- Run the usb_host on Linux host, same as above method for Pi.
