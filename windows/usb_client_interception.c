@@ -14,26 +14,16 @@ int is_league_active() {
     static int cached_result = 0;
     DWORD now = GetTickCount();
 
-    // Check every 500ms to avoid calling Windows API too frequently
+    // Check every 500ms
     if (now - last_check < 500 && last_check != 0) {
         return cached_result;
     }
     last_check = now;
 
-    HWND hwnd = GetForegroundWindow();
-    if (hwnd == NULL) {
-        cached_result = 0;
-        return 0;
-    }
-
-    char title[256];
-    // GetWindowTextA is the ANSI version, compatible with char buffers
-    if (GetWindowTextA(hwnd, title, sizeof(title)) > 0) {
-        // Check if title contains "League of Legends"
-        if (strstr(title, "League of Legends") != NULL) {
-            cached_result = 1;
-            return 1;
-        }
+    HWND hwnd = FindWindowA(NULL, "League of Legends (TM) Client");
+    if (hwnd != NULL) {
+        cached_result = 1;
+        return 1;
     }
 
     cached_result = 0;
