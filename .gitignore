@@ -24,6 +24,7 @@
 
 # Shared objects (inc. Windows DLLs)
 *.dll
+!windows/interception.dll
 *.so
 *.so.*
 *.dylib
