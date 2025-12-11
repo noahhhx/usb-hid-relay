@@ -103,6 +103,24 @@ int main() {
             if (right_curr && !right_last)      state |= INTERCEPTION_MOUSE_RIGHT_BUTTON_DOWN;
             else if (!right_curr && right_last) state |= INTERCEPTION_MOUSE_RIGHT_BUTTON_UP;
 
+            // Middle Button
+            int middle_curr = buttons & 4;
+            int middle_last = last_buttons & 4;
+            if (middle_curr && !middle_last)      state |= INTERCEPTION_MOUSE_MIDDLE_BUTTON_DOWN;
+            else if (!middle_curr && middle_last) state |= INTERCEPTION_MOUSE_MIDDLE_BUTTON_UP;
+
+            // Button 4 (Side/Back)
+            int button4_curr = buttons & 8;
+            int button4_last = last_buttons & 8;
+            if (button4_curr && !button4_last)      state |= INTERCEPTION_MOUSE_BUTTON_4_DOWN;
+            else if (!button4_curr && button4_last) state |= INTERCEPTION_MOUSE_BUTTON_4_UP;
+
+            // Button 5 (Side/Forward)
+            int button5_curr = buttons & 16;
+            int button5_last = last_buttons & 16;
+            if (button5_curr && !button5_last)      state |= INTERCEPTION_MOUSE_BUTTON_5_DOWN;
+            else if (!button5_curr && button5_last) state |= INTERCEPTION_MOUSE_BUTTON_5_UP;
+
             // Update history
             last_buttons = buttons;
 
